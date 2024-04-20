@@ -1,6 +1,9 @@
 # Start with a base image containing Java runtime
 FROM openjdk:8-jdk-alpine as builder
 
+# Install wget
+RUN apk --no-cache add wget
+
 # Set the working directory in the container
 WORKDIR /app
 
@@ -22,11 +25,17 @@ FROM openjdk:8-jre-alpine
 # Set the working directory in the container
 WORKDIR /app
 
+# Install wget in the runtime image
+RUN apk --no-cache add wget
+
+# Download the DataDog Java agent
+RUN wget -O dd-java-agent.jar 'https://dtdg.co/latest-java-tracer'
+
 # Copy over the built artifact from the builder stage
 COPY --from=builder /app/build/libs/*.jar /app/app.jar
 
 # Expose port 8080 to the outside world
 EXPOSE 8080
 
-# Run the application
-ENTRYPOINT ["java", "-jar", "/app/app.jar"]
+# Use shell form to enable environment variable resolution at runtime
+ENTRYPOINT ["sh", "-c", "export DD_AGENT_HOST=$(curl http://169.254.169.254/latest/meta-data/local-ipv4) && java -javaagent:/app/dd-java-agent.jar -jar /app/app.jar"]
