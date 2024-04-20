@@ -1,9 +1,6 @@
 # Start with a base image containing Java runtime
 FROM openjdk:8-jdk-alpine as builder
 
-# Install wget
-RUN apk --no-cache add wget
-
 # Set the working directory in the container
 WORKDIR /app
 
@@ -25,11 +22,8 @@ FROM openjdk:8-jre-alpine
 # Set the working directory in the container
 WORKDIR /app
 
-# Install wget in the runtime image
-RUN apk --no-cache add wget
-
-# Download the DataDog Java agent
-RUN wget -O dd-java-agent.jar 'https://dtdg.co/latest-java-tracer'
+# Add the DataDog Java agent directly from the URL
+ADD https://dtdg.co/latest-java-tracer /app/dd-java-agent.jar
 
 # Copy over the built artifact from the builder stage
 COPY --from=builder /app/build/libs/*.jar /app/app.jar
