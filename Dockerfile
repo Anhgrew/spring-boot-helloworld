@@ -19,6 +19,8 @@ RUN ./gradlew build -x test --no-daemon
 # Use a lightweight base image for the final stage to keep the container small
 FROM openjdk:8-jre-alpine
 
+RUN apk --no-cache add curl
+
 # Set the working directory in the container
 WORKDIR /app
 
